@@ -1,0 +1,192 @@
+@model IEnumerable<AP.Data.Notification>
+
+@{
+    ViewBag.Title = "Notificaciones";
+    var currentPage = (int)(ViewBag.CurrentPage ?? 1);
+    var totalPages = (int)(ViewBag.TotalPages ?? 1);
+    var totalItems = (int)(ViewBag.TotalItems ?? 0);
+    var currentCriteria = (ViewBag.Criteria as string) ?? string.Empty;
+    var currentField = (ViewBag.Field as string) ?? string.Empty;
+    var currentFilter = (ViewBag.Filter as string) ?? string.Empty;
+    var fieldOptions = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "Mensaje", Value = "message" },
+        new SelectListItem { Text = "ID de usuario", Value = "user_id" },
+        new SelectListItem { Text = "Fecha de creación", Value = "created_at" }
+    };
+}
+
+<main>
+    <div class="page-header">
+        <h1 class="mb-1">Notificaciones</h1>
+        <p class="lead text-muted mb-0">Administración de notificaciones del sistema</p>
+    </div>
+
+    <div class="search-create-row">
+        <div class="search-bar search-bar-inline mb-0">
+            @using (Html.BeginForm("Search", "Notifications", FormMethod.Post, new { @class = "d-flex flex-wrap align-items-end gap-2" }))
+            {
+                <div>
+                    <label for="criteria">Buscar:</label>
+                    @Html.TextBox("criteria", currentCriteria, new { @class = "form-control", id = "criteria", placeholder = "Texto a buscar" })
+                </div>
+                <div>
+                    <label for="field">Campo:</label>
+                    @Html.DropDownList(
+                        "field",
+                        new SelectList(fieldOptions, "Value", "Text", currentField),
+                        "Seleccionar campo",
+                        new { @class = "form-select", id = "field" }
+                    )
+                </div>
+                <button type="submit" class="btn btn-primary">Buscar</button>
+                @Html.ActionLink("Limpiar", "Index", "Notifications", null, new { @class = "btn btn-outline-secondary" })
+            }
+        </div>
+        <div class="create-btn-wrap">
+            @Html.ActionLink("Crear nuevo", "Create", null, new { @class = "btn btn-primary" })
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        @Html.ActionLink("Últimas 10 (usuario 1)", "Index", new { filter = "last10" }, new { @class = "btn btn-sm " + (currentFilter == "last10" ? "btn-secondary" : "btn-outline-secondary") })
+        @Html.ActionLink("Primeras 10 (usuario 1)", "Index", new { filter = "first10" }, new { @class = "btn btn-sm " + (currentFilter == "first10" ? "btn-secondary" : "btn-outline-secondary") })
+        @Html.ActionLink("ID Pares", "Index", new { filter = "even" }, new { @class = "btn btn-sm " + (currentFilter == "even" ? "btn-secondary" : "btn-outline-secondary") })
+        @Html.ActionLink("ID Impares", "Index", new { filter = "odd" }, new { @class = "btn btn-sm " + (currentFilter == "odd" ? "btn-secondary" : "btn-outline-secondary") })
+        @Html.ActionLink("Activos", "Index", new { filter = "active" }, new { @class = "btn btn-sm " + (currentFilter == "active" ? "btn-success" : "btn-outline-success") })
+        @Html.ActionLink("Inactivos", "Index", new { filter = "inactive" }, new { @class = "btn btn-sm " + (currentFilter == "inactive" ? "btn-danger" : "btn-outline-danger") })
+    </div>
+
+    <div class="table-wrapper">
+        <table class="table table-dark table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Mensaje</th>
+                    <th>Leído</th>
+                    <th>Fecha de creación</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.id)</td>
+                        <td>@Html.DisplayFor(modelItem => item.user_id)</td>
+                        <td>@Html.DisplayFor(modelItem => item.message)</td>
+                        <td>@Html.DisplayFor(modelItem => item.is_read)</td>
+                        <td>@Html.DisplayFor(modelItem => item.created_at)</td>
+                        <td class="text-end action-links">
+                            <a href="@Url.Action("Edit", "Notifications", new { id = item.id })"
+                               class="action-icon-btn action-edit"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="top"
+                               title="Editar"
+                               aria-label="Editar">
+                                <span aria-hidden="true">✎</span>
+                            </a>
+                            <a href="#"
+                               class="action-icon-btn action-details js-notification-details"
+                               data-details-url="@Url.Action("DetailsModal", "Notifications", new { id = item.id })"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="top"
+                               title="Detalles"
+                               aria-label="Detalles">
+                                <span aria-hidden="true">👁</span>
+                            </a>
+                            <a href="@Url.Action("Delete", "Notifications", new { id = item.id })"
+                               class="action-icon-btn action-delete"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="top"
+                               title="Eliminar"
+                               aria-label="Eliminar">
+                                <span aria-hidden="true">🗑</span>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-toolbar">
+        <span class="pagination-summary">Mostrando @Model.Count() de @totalItems notificaciones</span>
+        @if (totalPages > 1)
+        {
+            <nav aria-label="Paginación de notificaciones">
+                <ul class="pagination mb-0">
+                    <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { page = currentPage - 1, pageSize = 10, criteria = currentCriteria, field = currentField, filter = currentFilter })">Anterior</a>
+                    </li>
+
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = i, pageSize = 10, criteria = currentCriteria, field = currentField, filter = currentFilter })">@i</a>
+                        </li>
+                    }
+
+                    <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { page = currentPage + 1, pageSize = 10, criteria = currentCriteria, field = currentField, filter = currentFilter })">Siguiente</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
+
+    <div class="modal fade" id="notificationDetailsModal" tabindex="-1" aria-labelledby="notificationDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationDetailsModalLabel">Detalles de la notificación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body" id="notificationDetailsBody">
+                    <div class="modal-loading">Cargando detalles...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    <script>
+        (function () {
+            var detailsModalEl = document.getElementById('notificationDetailsModal');
+            var detailsBody = document.getElementById('notificationDetailsBody');
+            if (!detailsModalEl || !detailsBody || !window.bootstrap) return;
+
+            var detailsModal = new bootstrap.Modal(detailsModalEl);
+            var detailLinks = document.querySelectorAll('.js-notification-details');
+
+            function renderError() {
+                detailsBody.innerHTML = '<div class="modal-loading">No fue posible cargar los detalles.</div>';
+            }
+
+            detailLinks.forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var url = link.getAttribute('data-details-url');
+                    if (!url) return;
+
+                    detailsBody.innerHTML = '<div class="modal-loading">Cargando detalles...</div>';
+                    detailsModal.show();
+
+                    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then(function (response) {
+                            if (!response.ok) throw new Error('Failed request');
+                            return response.text();
+                        })
+                        .then(function (html) {
+                            detailsBody.innerHTML = html;
+                        })
+                        .catch(function () {
+                            renderError();
+                        });
+                });
+            });
+        })();
+    </script>
+}

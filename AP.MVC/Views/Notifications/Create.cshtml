@@ -1,0 +1,72 @@
+@model AP.Data.Notification
+
+@{
+    ViewBag.Title = "Crear notificación";
+}
+
+<main>
+    <div class="page-header">
+        <h1>Crear notificación</h1>
+        <p class="lead text-muted">Agregar una nueva notificación al sistema</p>
+    </div>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
+    <div class="detail-card mb-4">
+        <div class="product-detail-modal-card">
+            <div class="product-detail-title">Nueva notificación</div>
+            <table class="table table-dark product-detail-table product-edit-table">
+                <tbody>
+                    <tr>
+                        <th>ID de usuario</th>
+                        <td>
+                            @Html.EditorFor(model => model.user_id, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.user_id, "", new { @class = "text-danger" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Mensaje</th>
+                        <td>
+                            @Html.EditorFor(model => model.message, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.message, "", new { @class = "text-danger" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Leído</th>
+                        <td>
+                            @Html.DropDownListFor(model => model.is_read,
+                                new List<SelectListItem> {
+                                    new SelectListItem { Text = "No (Activo)", Value = "false" },
+                                    new SelectListItem { Text = "Sí (Inactivo)", Value = "true" }
+                                },
+                                "Seleccionar...",
+                                new { @class = "form-select" })
+                            @Html.ValidationMessageFor(model => model.is_read, "", new { @class = "text-danger" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Fecha de creación</th>
+                        <td>
+                            @Html.TextBoxFor(model => model.created_at, "{0:dd/MM/yyyy}", new { @class = "form-control", placeholder = "dd/MM/yyyy" })
+                            @Html.ValidationMessageFor(model => model.created_at, "", new { @class = "text-danger" })
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="form-actions no-color">
+        <input type="submit" value="Crear" class="btn btn-primary" />
+        @Html.ActionLink("Volver al listado", "Index", null, new { @class = "btn btn-outline-secondary ms-2" })
+    </div>
+}
+</main>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -60,6 +60,7 @@
       <DependentUpon>ProductModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Entities\IEntity.cs" />
+    <Compile Include="Entities\Notification.cs" />
     <Compile Include="Entities\Product.cs" />
     <Compile Include="Entities\Supplier.cs" />
     <Compile Include="Inventory.cs">

@@ -1,0 +1,41 @@
+@model AP.Data.Notification
+
+@{
+    ViewBag.Title = "Eliminar notificación";
+}
+
+<main>
+    <div class="page-header">
+        <h1>Eliminar notificación</h1>
+        <p class="lead text-muted">¿Estás seguro de que deseas eliminar esta notificación?</p>
+    </div>
+
+    <div class="detail-card mb-4">
+        <dl class="dl-horizontal">
+            <dt>ID</dt>
+            <dd>@Html.DisplayFor(model => model.id)</dd>
+
+            <dt>ID de usuario</dt>
+            <dd>@Html.DisplayFor(model => model.user_id)</dd>
+
+            <dt>Mensaje</dt>
+            <dd>@Html.DisplayFor(model => model.message)</dd>
+
+            <dt>Leído</dt>
+            <dd>@Html.DisplayFor(model => model.is_read)</dd>
+
+            <dt>Fecha de creación</dt>
+            <dd>@Html.DisplayFor(model => model.created_at)</dd>
+        </dl>
+    </div>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Eliminar" class="btn btn-danger" />
+            @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-outline-secondary ms-2" })
+        </div>
+    }
+</main>

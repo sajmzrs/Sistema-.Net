@@ -1,0 +1,35 @@
+@model AP.Data.Notification
+
+<div class="product-detail-modal-card">
+    <div class="product-detail-head">
+        <div class="product-detail-title">Notificación #@Model.id</div>
+        <div class="product-detail-actions">
+            <a href="@Url.Action("Edit", "Notifications", new { id = Model.id })" class="btn btn-primary btn-sm">Editar</a>
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+    </div>
+    <table class="table table-dark product-detail-table">
+        <tbody>
+            <tr>
+                <th>ID</th>
+                <td>@Model.id</td>
+            </tr>
+            <tr>
+                <th>ID de usuario</th>
+                <td>@Model.user_id</td>
+            </tr>
+            <tr>
+                <th>Mensaje</th>
+                <td>@Model.message</td>
+            </tr>
+            <tr>
+                <th>Leído</th>
+                <td>@(Model.is_read.HasValue ? (Model.is_read.Value ? "Sí" : "No") : "-")</td>
+            </tr>
+            <tr>
+                <th>Fecha de creación</th>
+                <td>@(Model.created_at.HasValue ? Model.created_at.Value.ToString("dd/MM/yyyy") : "-")</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
