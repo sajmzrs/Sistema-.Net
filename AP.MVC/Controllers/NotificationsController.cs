@@ -89,6 +89,11 @@ namespace AP.MVC.Controllers
             ViewBag.Field = field;
             ViewBag.Filter = filter;
 
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("_NotificationsTable", paged);
+            }
+
             return View(paged);
         }
 
@@ -203,6 +208,12 @@ namespace AP.MVC.Controllers
         public ActionResult Search(string criteria, string field)
         {
             return RedirectToAction("Index", new { page = 1, pageSize = 10, criteria, field });
+        }
+
+        // GET: Notifications/JsonCall
+        public JsonResult JsonCall()
+        {
+            return Json(new { message = "Todo bien desde Notificaciones" }, JsonRequestBehavior.AllowGet);
         }
     }
 }
