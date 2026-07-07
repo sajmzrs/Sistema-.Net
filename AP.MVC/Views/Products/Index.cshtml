@@ -49,6 +49,7 @@
 			}
 		</div>
 		<div class="create-btn-wrap">
+			<button type="button" class="btn btn-outline-primary" onclick="topRated()">Top Rated</button>
 			@Html.ActionLink("Crear nuevo", "Create", null, new { @class = "btn btn-primary" })
 		</div>
 	</div>
@@ -69,7 +70,7 @@
 					<th class="text-end">Acciones</th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody id="products-table-body">
 				@foreach (var item in Model)
 				{
 					<tr>
@@ -115,7 +116,7 @@
 		</table>
 	</div>
 
-	<div class="pagination-toolbar">
+	<div class="pagination-toolbar" id="products-pagination-toolbar">
 		<span class="pagination-summary">Mostrando @Model.Count() de @totalItems productos</span>
 		@if (totalPages > 1)
 		{
@@ -158,38 +159,170 @@
 @section Scripts {
     <script>
         (function () {
+            var filterUrl = '@Url.Action("Filter", "Products")';
+            var editUrlTemplate = '@Url.Action("Edit", "Products", new { id = "__id__" })';
+            var detailsUrlTemplate = '@Url.Action("DetailsModal", "Products", new { id = "__id__" })';
+            var deleteUrlTemplate = '@Url.Action("Delete", "Products", new { id = "__id__" })';
+
             var detailsModalEl = document.getElementById('productDetailsModal');
             var detailsBody = document.getElementById('productDetailsBody');
-            if (!detailsModalEl || !detailsBody || !window.bootstrap) return;
+            var productsTableBody = $('#products-table-body');
+            var paginationToolbar = $('#products-pagination-toolbar');
 
-            var detailsModal = new bootstrap.Modal(detailsModalEl);
-            var detailLinks = document.querySelectorAll('.js-product-details');
+            function buildUrl(template, id) {
+                return template.replace('__id__', encodeURIComponent(id));
+            }
 
             function renderError() {
                 detailsBody.innerHTML = '<div class="modal-loading">No fue posible cargar los detalles.</div>';
             }
 
-            detailLinks.forEach(function (link) {
-                link.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    var url = link.getAttribute('data-details-url');
-                    if (!url) return;
+            function formatDate(value) {
+                if (!value) return '';
 
-                    detailsBody.innerHTML = '<div class="modal-loading">Cargando detalles...</div>';
-                    detailsModal.show();
+                var match = /\/Date\((-?\d+)\)\//.exec(value);
+                var date = match ? new Date(parseInt(match[1], 10)) : new Date(value);
 
-                    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                        .then(function (response) {
-                            if (!response.ok) throw new Error('Failed request');
-                            return response.text();
-                        })
-                        .then(function (html) {
-                            detailsBody.innerHTML = html;
-                        })
-                        .catch(function () {
-                            renderError();
-                        });
+                if (isNaN(date.getTime())) return '';
+                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+            }
+
+            function addCell(row, value) {
+                $('<td>').text(value == null ? '' : value).appendTo(row);
+            }
+
+            function initTooltips(scope) {
+                if (!window.bootstrap || !window.bootstrap.Tooltip) return;
+
+                $(scope).find('[data-bs-toggle="tooltip"]').each(function () {
+                    bootstrap.Tooltip.getOrCreateInstance(this);
                 });
+            }
+
+            function renderEmpty(message) {
+                var row = $('<tr>');
+                $('<td>').attr('colspan', 10).addClass('text-center').text(message).appendTo(row);
+                productsTableBody.empty().append(row);
+            }
+
+            function renderProducts(products) {
+                productsTableBody.empty();
+
+                if (!products || products.length === 0) {
+                    renderEmpty('No hay productos para mostrar.');
+                    return;
+                }
+
+                $.each(products, function (_, product) {
+                    var row = $('<tr>');
+                    addCell(row, product.ProductName);
+                    addCell(row, product.InventoryID);
+                    addCell(row, product.SupplierID);
+                    addCell(row, product.Description);
+                    addCell(row, product.Rating);
+                    addCell(row, product.CategoryID);
+                    addCell(row, formatDate(product.LastModified));
+                    addCell(row, product.ModifiedBy);
+                    addCell(row, product.CreatedBy);
+
+                    var actions = $('<td>').addClass('text-end action-links');
+
+                    $('<a>')
+                        .attr({
+                            href: buildUrl(editUrlTemplate, product.ProductID),
+                            title: 'Editar',
+                            'aria-label': 'Editar',
+                            'data-bs-toggle': 'tooltip',
+                            'data-bs-placement': 'top'
+                        })
+                        .addClass('action-icon-btn action-edit')
+                        .append($('<span>').attr('aria-hidden', 'true').text('E'))
+                        .appendTo(actions);
+
+                    $('<a>')
+                        .attr({
+                            href: '#',
+                            title: 'Detalles',
+                            'aria-label': 'Detalles',
+                            'data-details-url': buildUrl(detailsUrlTemplate, product.ProductID),
+                            'data-bs-toggle': 'tooltip',
+                            'data-bs-placement': 'top'
+                        })
+                        .addClass('action-icon-btn action-details js-product-details')
+                        .append($('<span>').attr('aria-hidden', 'true').text('D'))
+                        .appendTo(actions);
+
+                    $('<a>')
+                        .attr({
+                            href: buildUrl(deleteUrlTemplate, product.ProductID),
+                            title: 'Eliminar',
+                            'aria-label': 'Eliminar',
+                            'data-bs-toggle': 'tooltip',
+                            'data-bs-placement': 'top'
+                        })
+                        .addClass('action-icon-btn action-delete')
+                        .append($('<span>').attr('aria-hidden', 'true').text('X'))
+                        .appendTo(actions);
+
+                    row.append(actions);
+                    productsTableBody.append(row);
+                });
+
+                initTooltips(productsTableBody);
+            }
+
+            window.topRated = function () {
+                if (!productsTableBody.length) return;
+
+                renderEmpty('Cargando productos mejor valorados...');
+
+                fetch(filterUrl + '?criteria=rating', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(function (response) {
+                        if (!response.ok) throw new Error('Error en la peticion');
+                        return response.json();
+                    })
+                    .then(function (products) {
+                        renderProducts(products);
+                        paginationToolbar.html('<span class="pagination-summary">Mostrando ' + products.length + ' productos mejor valorados</span>');
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                        renderEmpty('Error al cargar los productos mejor valorados.');
+                    });
+            };
+
+            if (!detailsModalEl || !detailsBody || !window.bootstrap) return;
+
+            var detailsModal = new bootstrap.Modal(detailsModalEl);
+
+            document.addEventListener('click', function (e) {
+                var link = e.target.closest('.js-product-details');
+                if (!link) return;
+
+                e.preventDefault();
+                var url = link.getAttribute('data-details-url');
+                if (!url) return;
+
+                detailsBody.innerHTML = '<div class="modal-loading">Cargando detalles...</div>';
+                detailsModal.show();
+
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(function (response) {
+                        if (!response.ok) throw new Error('Failed request');
+                        return response.text();
+                    })
+                    .then(function (html) {
+                        detailsBody.innerHTML = html;
+                    })
+                    .catch(function () {
+                        renderError();
+                    });
             });
         })();
     </script>

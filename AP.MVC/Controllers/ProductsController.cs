@@ -1,6 +1,7 @@
 using AP.Core.Business;
 using AP.Data;
 using AP.MVC.Filter;
+using AP.MVC.Models;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
@@ -189,6 +190,34 @@ namespace AP.MVC.Controllers
         {
             // SOLID: principio tal Y
             return RedirectToAction("Index", new { page = 1, pageSize = 10, criteria, field });
+        }
+
+        // GET: Products/Filter
+        public JsonResult Filter(string criteria)
+        {
+            if (string.IsNullOrEmpty(criteria))
+                return Json(Enumerable.Empty<ProductViewModel>(), JsonRequestBehavior.AllowGet);
+
+            if (criteria == "rating")
+            {
+                var products = _business.GetProducts().Select(x => new ProductViewModel
+                {
+                    ProductID = x.ProductID,
+                    ProductName = x.ProductName,
+                    CategoryID = x.CategoryID,
+                    InventoryID = x.InventoryID,
+                    SupplierID = x.SupplierID,
+                    Description = x.Description,
+                    Rating = x.Rating,
+                    ModifiedBy = x.ModifiedBy,
+                    LastModified = x.LastModified,
+                    CreatedBy = x.CreatedBy,
+                }).OrderByDescending(x => x.Rating).Take(10).ToList();
+
+                return Json(products, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(Enumerable.Empty<ProductViewModel>(), JsonRequestBehavior.AllowGet);
         }
 
         // GET: Products
