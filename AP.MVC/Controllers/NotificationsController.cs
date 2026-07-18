@@ -8,7 +8,7 @@ using System.Web.Mvc;
 
 namespace AP.MVC.Controllers
 {
-    [CustomAuthorizationFilter]
+    [CustomAuthorizationFilter("NotificationsView")]
     public class NotificationsController : BaseController
     {
         private NotificationBusiness _business = new NotificationBusiness();
@@ -150,6 +150,7 @@ namespace AP.MVC.Controllers
         }
 
         // GET: Notifications/Edit/5
+        [CustomAuthorizationFilter("NotificationsEdit")]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -165,6 +166,7 @@ namespace AP.MVC.Controllers
         // POST: Notifications/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [CustomAuthorizationFilter("NotificationsEdit")]
         public ActionResult Edit([Bind(Include = "id,user_id,message,is_read,created_at")] Notification notification)
         {
             if (ModelState.IsValid)

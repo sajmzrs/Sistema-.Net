@@ -1,20 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using AP.Repositories;
 using System.Web.Mvc;
 
 namespace AP.MVC.Filter
 {
     public class CustomAuthorizationFilter : FilterAttribute, System.Web.Mvc.IAuthorizationFilter
     {
+        private readonly string _requiredAction;
+
+        public CustomAuthorizationFilter()
+        {
+        }
+
+        public CustomAuthorizationFilter(string requiredAction)
+        {
+            _requiredAction = requiredAction;
+        }
+
         public void OnAuthorization(AuthorizationContext filterContext)
         {
             if (!filterContext.HttpContext.User.Identity.IsAuthenticated)
             {
-                // Name: Database "amiranda@gmai.com" = Roles (Admin)
-                //filterContext.RequestContext.HttpContext.Response.Redirect("/Account/Login");
                 filterContext.Result = new RedirectResult("/Account/Login");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_requiredAction))
+                return;
+
+            string userEmail = filterContext.HttpContext.User.Identity.Name;
+            IPermissionsRepository repository = new PermissionsRepository();
+
+            if (!repository.HasPermission(userEmail, _requiredAction))
+            {
+                filterContext.Result = new HttpUnauthorizedResult("No tiene permiso para realizar esta accion.");
             }
         }
     }

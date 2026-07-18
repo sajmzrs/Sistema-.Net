@@ -69,6 +69,9 @@
     <Compile Include="Notification.cs">
       <DependentUpon>ProductModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Permission.cs">
+      <DependentUpon>ProductModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Product.cs">
       <DependentUpon>ProductModel.tt</DependentUpon>
     </Compile>
@@ -98,6 +101,12 @@
       <DependentUpon>ProductModel.tt</DependentUpon>
     </Compile>
     <Compile Include="User.cs">
+      <DependentUpon>ProductModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="UserAction.cs">
+      <DependentUpon>ProductModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="UserRole.cs">
       <DependentUpon>ProductModel.tt</DependentUpon>
     </Compile>
   </ItemGroup>

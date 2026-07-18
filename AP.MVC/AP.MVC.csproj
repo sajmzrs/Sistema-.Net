@@ -522,6 +522,10 @@
       <Project>{b59d0ef3-6a25-4bc1-b1b0-dd9036b9f16f}</Project>
       <Name>AP.Models</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AP.Repositories\AP.Repositories.csproj">
+      <Project>{b178303b-dc9f-4f1b-9352-b46f1b39d8fd}</Project>
+      <Name>AP.Repositories</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

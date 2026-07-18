@@ -12,18 +12,21 @@ namespace AP.Data
     using System;
     using System.Collections.Generic;
     
-    public partial class Role
+    public partial class UserRole
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Role()
+        public UserRole()
         {
-            this.UserRoles = new HashSet<UserRole>();
+            this.Permissions = new HashSet<Permission>();
         }
     
+        public int ID { get; set; }
+        public int UserID { get; set; }
         public int RoleID { get; set; }
-        public string RoleName { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<UserRole> UserRoles { get; set; }
+        public virtual ICollection<Permission> Permissions { get; set; }
+        public virtual Role Role { get; set; }
+        public virtual User User { get; set; }
     }
 }

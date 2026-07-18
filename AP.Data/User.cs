@@ -14,6 +14,12 @@ namespace AP.Data
     
     public partial class User
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public User()
+        {
+            this.UserRoles = new HashSet<UserRole>();
+        }
+    
         public int UserID { get; set; }
         public string Username { get; set; }
         public string Email { get; set; }
@@ -24,5 +30,8 @@ namespace AP.Data
         public string ModifiedBy { get; set; }
         public Nullable<int> RoleID { get; set; }
         public string LastModifiedBy { get; set; }
+    
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<UserRole> UserRoles { get; set; }
     }
 }

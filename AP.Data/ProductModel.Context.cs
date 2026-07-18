@@ -34,5 +34,8 @@ namespace AP.Data
         public virtual DbSet<Supplier> Suppliers { get; set; }
         public virtual DbSet<Task> Tasks { get; set; }
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Permission> Permissions { get; set; }
+        public virtual DbSet<UserAction> UserActions { get; set; }
+        public virtual DbSet<UserRole> UserRoles { get; set; }
     }
 }

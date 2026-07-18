@@ -17,6 +17,13 @@
         <AssociationConnector Association="ProductDBModel.FK__Products__Catego__3B40CD36" />
         <AssociationConnector Association="ProductDBModel.FK__Products__Invent__395884C4" />
         <AssociationConnector Association="ProductDBModel.FK__Products__Suppli__3A4CA8FD" />
+        <EntityTypeShape EntityType="ProductDBModel.Permission" Width="1.5" PointX="11.875" PointY="1.375" />
+        <EntityTypeShape EntityType="ProductDBModel.UserAction" Width="1.5" PointX="9.625" PointY="5.375" />
+        <EntityTypeShape EntityType="ProductDBModel.UserRole" Width="1.5" PointX="9.625" PointY="1.25" />
+        <AssociationConnector Association="ProductDBModel.FK_Permissions_UserActions" />
+        <AssociationConnector Association="ProductDBModel.FK_Permissions_UserRoles" />
+        <AssociationConnector Association="ProductDBModel.FK_UserRoles_Roles" />
+        <AssociationConnector Association="ProductDBModel.FK_UserRoles_Users" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
